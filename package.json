@@ -6,8 +6,9 @@
   "main": "server.js",
   "scripts": {
     "test": "cross-env NODE_ENV=test jest --testTimeout=10000 --detectOpenHandles",
-    "pretest": "cross-env NODE_ENV=test npm run db:reset",
+    "pretest": "cross-env NODE_ENV=test npm run db:reset:test",
     "db:create:test": "cross-env NODE_ENV=test npx sequelize db:create",
+    "db:reset:test": "npx sequelize db:migrate && npx sequelize db:seed:all",
     "dev": "nodemon server.js",
     "db:reset": "npx sequelize db:drop && npx sequelize db:create && npx sequelize db:migrate && npx sequelize db:seed:all"
   },
@@ -26,6 +27,7 @@
     "jest": "^29.4.3",
     "nodemon": "^2.0.21",
     "sequelize-cli": "^6.6.0",
+    "sqlite3": "^5.1.4",
     "supertest": "^6.3.3"
   },
   "jest": {
