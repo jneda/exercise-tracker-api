@@ -22,7 +22,15 @@ describe("Exercise tracker API", () => {
   it("should get all users", async () => {
     const response = await request(app).get("/api/users");
     expect(response.statusCode).toEqual(200);
+
     const users = response.body;
     expect(users).toBeInstanceOf(Array);
+
+    function isValidUser(user) {
+      return user.username !== undefined && user._id !== undefined;
+    }
+
+    const allUsersAreValid = users.every((user) => isValidUser(user));
+    expect(allUsersAreValid).toBe(true);
   });
 });
