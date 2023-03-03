@@ -11,4 +11,6 @@ router.get("/users", controllers.getAllUsers);
 
 router.post("/users", controllers.createUser);
 
+router.post("/users/:id/exercises", controllers.createExercise);
+
 module.exports = router;

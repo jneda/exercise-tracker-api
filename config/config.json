@@ -7,9 +7,11 @@
     "dialect": "mysql"
   },
   "test": {
+    "username": "root",
+    "password": null,
     "database": "exercise_tracker_test",
-    "storage": "../tests/db.sqlite",
-    "dialect": "sqlite"
+    "host": "127.0.0.1",
+    "dialect": "mysql"
   },
   "production": {
     "username": "root",

@@ -6,9 +6,8 @@
   "main": "server.js",
   "scripts": {
     "test": "cross-env NODE_ENV=test jest --testTimeout=10000 --detectOpenHandles",
-    "pretest": "cross-env NODE_ENV=test npm run db:reset:test",
+    "pretest": "cross-env NODE_ENV=test npm run db:reset",
     "db:create:test": "cross-env NODE_ENV=test npx sequelize db:create",
-    "db:reset:test": "npx sequelize db:migrate && npx sequelize db:seed:all",
     "dev": "nodemon server.js",
     "db:reset": "npx sequelize db:drop && npx sequelize db:create && npx sequelize db:migrate && npx sequelize db:seed:all"
   },

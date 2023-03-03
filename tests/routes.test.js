@@ -46,8 +46,9 @@ describe("Exercise tracker API", () => {
     let formData = `description=${exerciseData.description}`;
     formData = formData.concat(`&duration=${exerciseData.duration}`);
     formData = formData.concat(`&date=${exerciseData.date}`);
+    console.log("test formData:", formData)
 
-    const requestURL = `/api/users/:${user._id}/exercises`;
+    const requestURL = `/api/users/${user._id}/exercises`;
 
     const response = await request(app).post(requestURL).send(formData);
     expect(response.statusCode).toEqual(201);
