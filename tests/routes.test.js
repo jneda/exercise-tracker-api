@@ -5,10 +5,12 @@ const { User } = require("../models");
 
 describe("Exercise tracker API", () => {
   it("should create a new user from form data", async () => {
-    const usernameInput = "Toto  Totovitch  Totov";
-    const formData = `username=${encodeURIComponent(usernameInput)}`;
+    const userData = {
+      username: "Toto  Totovitch  Totov",
+    };
+    const formUrlencoded = toFormUrlEncoded(userData);
 
-    const response = await request(app).post("/api/users").send(formData);
+    const response = await request(app).post("/api/users").send(formUrlencoded);
     expect(response.statusCode).toEqual(201);
 
     const user = response.body;
@@ -17,7 +19,7 @@ describe("Exercise tracker API", () => {
 
     const { _id, username } = user;
     expect(validateUuid(_id)).toBe(true);
-    expect(username).toEqual(usernameInput);
+    expect(username).toEqual(userData.username);
   });
 
   it("should get all users", async () => {
@@ -44,11 +46,7 @@ describe("Exercise tracker API", () => {
       duration: 60,
       date: date,
     };
-    let formData = new FormData();
-    for (const [key, value] of Object.entries(exerciseData)) {
-      formData.append(key, value);
-    }
-    const formUrlencoded = new URLSearchParams(formData).toString();
+    const formUrlencoded = toFormUrlEncoded(exerciseData);
 
     // console.log("test formData:", formUrlencoded);
 
@@ -67,3 +65,11 @@ describe("Exercise tracker API", () => {
     });
   });
 });
+
+function toFormUrlEncoded(obj) {
+  let formData = new FormData();
+  for (const [key, value] of Object.entries(obj)) {
+    formData.append(key, value);
+  }
+  return new URLSearchParams(formData).toString();
+}
