@@ -64,6 +64,57 @@ describe("Exercise tracker API", () => {
       date: exerciseData.date.toDateString(),
     });
   });
+
+  it("should get an object with a count property when requesting GET /api/users/:_id/logs", async () => {
+    const user = await User.findOne();
+    const requestURL = `/api/users/${user._id}/logs`;
+
+    const response = await request(app).get(requestURL);
+    expect(response.statusCode).toEqual(200);
+
+    const actual = response.body;
+    expect(actual).toHaveProperty("count");
+  });
+
+  it("should get an object carrying the user object when requesting GET /api/users/:_id/logs", async () => {
+    const user = await User.findOne();
+    const requestURL = `/api/users/${user._id}/logs`;
+
+    const response = await request(app).get(requestURL);
+    expect(response.statusCode).toEqual(200);
+
+    const actual = response.body;
+    expect(actual._id).toEqual(user._id);
+    expect(actual.username).toEqual(user.username);
+  });
+
+  it("should get a log array when requesting GET /api/users/:_id/logs", async () => {
+    const user = await User.findOne();
+    const requestURL = `/api/users/${user._id}/logs`;
+
+    const response = await request(app).get(requestURL);
+    expect(response.statusCode).toEqual(200);
+
+    const actual = response.body;
+    expect(actual).toHaveProperty("log");
+    expect(actual.log).toBeInstanceOf(Array);
+  });
+
+  it("should get a log array containing exercise-like objects when requesting GET /api/users/:_id/logs", async () => {
+    const user = await User.findOne();
+    const requestURL = `/api/users/${user._id}/logs`;
+
+    const response = await request(app).get(requestURL);
+    expect(response.statusCode).toEqual(200);
+
+    const actual = response.body;
+    actual.log.forEach((item) => {
+      expect(Object.keys(item)).toEqual(["description", "duration", "date"]);
+      expect(item.description).toEqual(expect.any(String));
+      expect(item.duration).toEqual(expect.any(Number));
+      expect(item.date).toEqual(expect.any(String));
+    });
+  });
 });
 
 function toFormUrlEncoded(obj) {
