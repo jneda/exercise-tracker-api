@@ -20,29 +20,41 @@ async function getAllUsers(req, res) {
 }
 
 async function createExercise(req, res) {
-  console.log("reached createExercise route");
+  // console.log("reached createExercise route");
   try {
-    const { id: _id } = req.params;
-    const user = await User.findByPk(_id);
+    const { id: userId } = req.params;
+    const user = await User.findByPk(userId);
 
     if (!user) {
       return res.status(404).send({ error: "User not found." });
     }
 
-    const { description, duration, date } = req.body;
-    console.log("body:", req.body);
-    console.log("description:", description);
-    console.log("duration:", duration);
-    console.log("date:", date);
-    const exercise = await Exercise.create({ description, duration, date });
-    console.log("exercise", exercise);
-    await exercise.setUser(user);
+    let { description, duration, date } = req.body;
+    date = new Date(date).toISOString();
+    // console.log("body:", { ...req.body, date: date });
 
-    return res.status(201).send({ ...exercise, ...user });
+    let exercise = await Exercise.create(
+      {
+        description,
+        duration,
+        date,
+        userId,
+      },
+      { raw: true }
+    );
+    // needed to get duration as int...
+    await exercise.reload();
+
+    return res.status(201).send({
+      _id: user._id,
+      username: user.username,
+      description: exercise.description,
+      duration: exercise.duration,
+      date: new Date(exercise.date).toDateString(),
+    });
   } catch (error) {
     return res.status(500).send({ error: error.message });
   }
-  return res.send("coucou !");
 }
 
 module.exports = {

@@ -37,23 +37,33 @@ describe("Exercise tracker API", () => {
 
   it("should create a new exercise from form data", async () => {
     const user = await User.findOne();
+    const date = new Date();
 
     const exerciseData = {
       description: "Go for a walk",
       duration: 60,
-      date: new Date(),
+      date: date,
     };
-    let formData = `description=${exerciseData.description}`;
-    formData = formData.concat(`&duration=${exerciseData.duration}`);
-    formData = formData.concat(`&date=${exerciseData.date}`);
-    console.log("test formData:", formData)
+    let formData = new FormData();
+    for (const [key, value] of Object.entries(exerciseData)) {
+      formData.append(key, value);
+    }
+    const formUrlencoded = new URLSearchParams(formData).toString();
+
+    // console.log("test formData:", formUrlencoded);
 
     const requestURL = `/api/users/${user._id}/exercises`;
 
-    const response = await request(app).post(requestURL).send(formData);
+    const response = await request(app).post(requestURL).send(formUrlencoded);
     expect(response.statusCode).toEqual(201);
 
     const exercise = response.body;
-    expect(exercise).toEqual({ ...exercise, ...user });
+    expect(exercise).toEqual({
+      _id: user._id,
+      username: user.username,
+      description: exerciseData.description,
+      duration: exerciseData.duration,
+      date: exerciseData.date.toDateString(),
+    });
   });
 });
