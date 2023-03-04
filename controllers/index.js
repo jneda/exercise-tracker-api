@@ -1,4 +1,6 @@
 const { Exercise, User } = require("../models");
+const { Op } = require("sequelize");
+const moment = require("moment");
 
 async function createUser(req, res) {
   try {
@@ -20,7 +22,6 @@ async function getAllUsers(req, res) {
 }
 
 async function createExercise(req, res) {
-  // console.log("reached createExercise route");
   try {
     const { id: userId } = req.params;
     const user = await User.findByPk(userId);
@@ -31,7 +32,12 @@ async function createExercise(req, res) {
 
     let { description, duration, date } = req.body;
     // set default date if not provided by user
-    date = date || new Date().toISOString();
+    if (!date) {
+      date = new Date();
+    } else {
+      date = new Date(date);
+    }
+    date = date.toISOString();
 
     let exercise = await Exercise.create(
       {
@@ -59,6 +65,8 @@ async function createExercise(req, res) {
 }
 
 async function getLog(req, res) {
+  console.log("req.params:", JSON.stringify(req.query, null, 2));
+
   try {
     const { id } = req.params;
     const user = await User.findByPk(id);
@@ -67,8 +75,44 @@ async function getLog(req, res) {
       return res.status(404).send({ error: "User not found." });
     }
 
+    // check for from, to, and limit parameters
+    const { from, to, limit } = req.query;
+
+    const searchDateFormat = "YYYY-MM-DD";
+
+    let fromDate;
+    if (from) {
+      try {
+        fromDate = moment(from, searchDateFormat).toISOString();
+        console.log("fromDate condition:", fromDate && { [Op.gte]: new Date(fromDate) });
+      } catch (error) {
+        console.error("Invalid date format.");
+      }
+    }
+
+    let toDate;
+    if (to) {
+      try {
+        toDate = moment(to, searchDateFormat).toISOString();
+        console.log("toDate condition:", toDate && { [Op.lte]: new Date(toDate) });
+      } catch (error) {
+        console.error("Invalid date format.");
+      }
+    }
+
+    const dateOptions = {
+      ...(fromDate ? { [Op.gte]: new Date(fromDate) } : null),
+      ...(toDate ? { [Op.lte]: new Date(toDate) } : null),
+    };
+
+    console.log("dateOptions", JSON.stringify(dateOptions, null, 2));
+
     const exercises = await Exercise.findAll({
-      where: { userId: user._id },
+      where: {
+        userId: user._id,
+        // ...dateOptions,
+      },
+      ...(limit && { limit: parseInt(limit) }),
     });
 
     const log = exercises.map((exercise) => {
@@ -83,7 +127,7 @@ async function getLog(req, res) {
       log,
     });
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
     return res.status(500).send({ error: error.message });
   }
 }

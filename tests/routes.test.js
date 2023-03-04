@@ -2,6 +2,7 @@ const request = require("supertest");
 const app = require("../app");
 const { v4: uuidv4, validate: validateUuid } = require("uuid");
 const { User } = require("../models");
+const moment = require("moment");
 
 describe("Exercise tracker API", () => {
   it("should create a new user from form data", async () => {
@@ -114,6 +115,43 @@ describe("Exercise tracker API", () => {
       expect(item.duration).toEqual(expect.any(Number));
       expect(item.date).toEqual(expect.any(String));
     });
+  });
+});
+
+describe("GET request to `/api/users/:_id/logs`", () => {
+  it("should accept from, to and limit query parameters", async () => {
+    const user = await User.findOne();
+    const requestURL = `/api/users/${user._id}/logs`;
+
+    const queryObject = {
+      from: moment().subtract(7, "days").format("YYYY-MM-DD"),
+      to: moment().format("YYYY-MM-DD"),
+      limit: 42,
+    };
+
+    const params = new URLSearchParams(queryObject);
+    console.log("params:", params);
+
+    const response = await request(app).get(`${requestURL}?${params}`);
+    expect(response.status).toEqual(200);
+  });
+
+  it("should only fetch results whose date is comprised between from and to paramater dates", async () => {
+    const user = await User.findOne();
+    const requestURL = `/api/users/${user._id}/logs`;
+
+    const queryObject = {
+      from: moment("1982").format("YYYY-MM-DD"),
+    };
+
+    const params = new URLSearchParams(queryObject);
+    console.log("params:", params);
+
+    const response = await request(app).get(`${requestURL}?${params}`);
+    expect(response.status).toEqual(200);
+
+    const actual = response.body;
+    expect(actual.count).toEqual(1);
   });
 });
 
