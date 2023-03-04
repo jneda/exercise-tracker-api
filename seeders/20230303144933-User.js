@@ -9,7 +9,7 @@ module.exports = {
       "Users",
       [
         {
-          username: "Athony Houlala",
+          username: "Anthony Houlala",
           _id: uuidv4(),
           createdAt: new Date(),
           updatedAt: new Date(),
