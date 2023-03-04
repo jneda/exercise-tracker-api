@@ -65,8 +65,6 @@ async function createExercise(req, res) {
 }
 
 async function getLog(req, res) {
-  console.log("req.params:", JSON.stringify(req.query, null, 2));
-
   try {
     const { id } = req.params;
     const user = await User.findByPk(id);
@@ -81,23 +79,21 @@ async function getLog(req, res) {
     const searchDateFormat = "YYYY-MM-DD";
 
     let fromDate;
-    if (from) {
-      try {
-        fromDate = moment(from, searchDateFormat).toISOString();
-        console.log("fromDate condition:", fromDate && { [Op.gte]: new Date(fromDate) });
-      } catch (error) {
-        console.error("Invalid date format.");
-      }
-    }
-
     let toDate;
-    if (to) {
-      try {
-        toDate = moment(to, searchDateFormat).toISOString();
-        console.log("toDate condition:", toDate && { [Op.lte]: new Date(toDate) });
-      } catch (error) {
-        console.error("Invalid date format.");
+    try {
+      if (from) {
+        fromDate = moment(from, searchDateFormat).toISOString();
+        if (!fromDate)
+          throw new Error("Query parameter form must be an ISO format date.");
       }
+
+      if (to) {
+        toDate = moment(to, searchDateFormat).toISOString();
+        if (!toDate)
+          throw new Error("Query parameter to must be an ISO format date.");
+      }
+    } catch (error) {
+      return res.status(400).send({ error: error.message });
     }
 
     const dateOptions = {
@@ -105,12 +101,10 @@ async function getLog(req, res) {
       ...(toDate ? { [Op.lte]: new Date(toDate) } : null),
     };
 
-    console.log("dateOptions", JSON.stringify(dateOptions, null, 2));
-
     const exercises = await Exercise.findAll({
       where: {
         userId: user._id,
-        // ...dateOptions,
+        ...((fromDate || toDate) && { date: { ...dateOptions } }),
       },
       ...(limit && { limit: parseInt(limit) }),
     });

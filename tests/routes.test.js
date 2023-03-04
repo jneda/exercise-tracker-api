@@ -49,8 +49,6 @@ describe("Exercise tracker API", () => {
     };
     const formUrlencoded = toFormUrlEncoded(exerciseData);
 
-    // console.log("test formData:", formUrlencoded);
-
     const requestURL = `/api/users/${user._id}/exercises`;
 
     const response = await request(app).post(requestURL).send(formUrlencoded);
@@ -130,22 +128,34 @@ describe("GET request to `/api/users/:_id/logs`", () => {
     };
 
     const params = new URLSearchParams(queryObject);
-    console.log("params:", params);
 
     const response = await request(app).get(`${requestURL}?${params}`);
     expect(response.status).toEqual(200);
   });
 
-  it("should only fetch results whose date is comprised between from and to paramater dates", async () => {
+  it("should reject invalid from query parameter", async () => {
     const user = await User.findOne();
     const requestURL = `/api/users/${user._id}/logs`;
 
     const queryObject = {
-      from: moment("1982").format("YYYY-MM-DD"),
+      from: "garbage input",
     };
 
     const params = new URLSearchParams(queryObject);
-    console.log("params:", params);
+
+    const response = await request(app).get(`${requestURL}?${params}`);
+    expect(response.status).toEqual(400);
+  });
+
+  it("should only fetch results whose date is greater than from parameter date", async () => {
+    const user = await User.findOne();
+    const requestURL = `/api/users/${user._id}/logs`;
+
+    const queryObject = {
+      from: moment("2000").format("YYYY-MM-DD"),
+    };
+
+    const params = new URLSearchParams(queryObject);
 
     const response = await request(app).get(`${requestURL}?${params}`);
     expect(response.status).toEqual(200);
