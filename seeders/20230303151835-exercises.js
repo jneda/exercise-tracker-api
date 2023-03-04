@@ -1,10 +1,12 @@
 "use strict";
-
+const { User } = require("../models");
 const { v4: uuidv4 } = require("uuid");
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
+    const users = await User.findAll();
+
     await queryInterface.bulkInsert(
       "Exercises",
       [
@@ -13,7 +15,7 @@ module.exports = {
           description: "Take the trash for a walk",
           duration: 10,
           date: new Date(),
-          userId: 1,
+          userId: users[0]._id,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -22,7 +24,7 @@ module.exports = {
           description: "Take the dog out",
           duration: 5,
           date: new Date(),
-          userId: 1,
+          userId: users[0]._id,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -31,7 +33,7 @@ module.exports = {
           description: "Sleep",
           duration: 20,
           date: new Date(),
-          userId: 2,
+          userId: users[1]._id,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
